@@ -1,0 +1,98 @@
+
+### Ejemplo sin errores
+POST http://localhost:8099/api/proceso/start
+Content-Type: application/json
+
+{
+"num_socio": "123456",
+"especialidad": "Cardiología",
+"motivo": "Chequeo general",
+"apto": true,
+"turnoDisponible": true,
+"fecha_turno": "2025-06-01T10:00:00",
+"mail": "correodeprueba@gmail.com"
+}
+
+### Ejemplo no apto para la cobertura
+POST http://localhost:8099/api/proceso/start
+Content-Type: application/json
+
+{
+"num_socio": "123456",
+"especialidad": "Cardiología",
+"motivo": "Chequeo general",
+"apto": false,
+"turnoDisponible": true,
+"fecha_turno": "2025-06-01T10:00:00",
+"mail": "correodeprueba@gmail.com"
+}
+
+### Ejemplo de turno de disponible
+POST http://localhost:8099/api/proceso/start
+Content-Type: application/json
+
+{
+"num_socio": "123456",
+"especialidad": "Cardiología",
+"motivo": "Chequeo general",
+"apto": true,
+"turnoDisponible": false,
+"fecha_turno": "2025-06-01T10:00:00",
+"mail": "correodeprueba@gmail.com"
+}
+
+### Ejemplo con fecha invalida y correo invalido
+POST http://localhost:8099/api/proceso/start
+Content-Type: application/json
+
+{
+"num_socio": "123456",
+"especialidad": "Cardiología",
+"motivo": "Chequeo general",
+"apto": true,
+"turnoDisponible": true,
+"fecha_turno": "2025-07-04T10:00:00",
+"mail": "correodeprueba@gmoil.com"
+}
+
+### Ejemplo con fecha invalida y correo valido
+POST http://localhost:8099/api/proceso/start
+Content-Type: application/json
+
+{
+"num_socio": "775789",
+"especialidad": "Neurología",
+"motivo": "Chequeo general",
+"apto": true,
+"turnoDisponible": true,
+"fecha_turno": "2025-07-04T10:00:00",
+"mail": "correodeprueba@gmail.com"
+}
+
+### Ejemplo con turno duplicado y correo valido
+POST http://localhost:8099/api/proceso/start
+Content-Type: application/json
+
+{
+"num_socio": "335782",
+"especialidad": "Neurología",
+"motivo": "Chequeo general",
+"apto": true,
+"turnoDisponible": true,
+"fecha_turno": "2025-06-04T10:00:00",
+"mail": "correodeprueba@gmail.com"
+}
+
+### Ejemplo con turno duplicado y correo invalido
+POST http://localhost:8099/api/proceso/start
+Content-Type: application/json
+
+{
+"num_socio": "335782",
+"especialidad": "Neurología",
+"motivo": "Chequeo general",
+"apto": true,
+"turnoDisponible": true,
+"fecha_turno": "2025-06-04T10:00:00",
+"mail": "correodeprueba@hotmail.com"
+}

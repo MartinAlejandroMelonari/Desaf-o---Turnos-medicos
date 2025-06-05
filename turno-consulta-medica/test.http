@@ -51,7 +51,7 @@ Content-Type: application/json
 "motivo": "Chequeo general",
 "apto": true,
 "turnoDisponible": true,
-"fecha_turno": "2025-07-04T10:00:00",
+"fecha_turno": "2025-05-04T10:00:00",
 "mail": "correodeprueba@gmoil.com"
 }
 
@@ -65,7 +65,7 @@ Content-Type: application/json
 "motivo": "Chequeo general",
 "apto": true,
 "turnoDisponible": true,
-"fecha_turno": "2025-07-04T10:00:00",
+"fecha_turno": "2025-05-04T10:00:00",
 "mail": "correodeprueba@gmail.com"
 }
 

@@ -21,25 +21,32 @@ public class NotificarSinTurnoHandler {
                                                 final ActivatedJob job,
                                                 @Variable String mail,
                                                 @Variable String num_socio) throws InterruptedException {
-            try {
-           logger.info("Notifiando al num_socio={} que no tiene turno, a traves de mail mail={}", num_socio, mail);
+            
+           logger.info("Notificando al num_socio={} que no tiene turno, a traves de mail mail={}", num_socio, mail);
 
            String razonRechazo = null;
 
-           // Simulación de reglas de negocio
-           if (mail != null && !mail.trim().toLowerCase().endsWith("@gmail.com")){
-               razonRechazo = "El mail ingresado no es valido, asi que no se puede enviar la notificación";
-               logger.info("Resultado de la notificación:  mail={}, razonRechazo={}", mail, razonRechazo);
-               throw new RuntimeException("El mail ingresado no es valido");
+           if (mail != null && !mail.trim().toLowerCase().endsWith("@gmail.com")) {
+               razonRechazo = "El mail ingresado no es válido, así que no se puede enviar la notificación";
+               logger.info("Resultado de la notificación: mail={}, razonRechazo={}", mail, razonRechazo);
            }
-
+   
            // Crear mapa de variables
            Map<String, Object> variables = new HashMap<>();
            variables.put("mail", mail);
            if (razonRechazo != null) {
                variables.put("razonRechazo", razonRechazo);
+   
+               // Lanzar error BPMN solo si hay razón de rechazo
+               client.newThrowErrorCommand(job)
+                       .errorCode("mail_invalido_1")
+                       .errorMessage(razonRechazo)
+                       .variables(variables) // opcional, pero útil
+                       .send()
+                       .join();
+               return; // Salir después de lanzar el error
            }
-
+   
            client.newCompleteCommand(job.getKey())
                    .variables(variables)
                    .send()
@@ -47,18 +54,8 @@ public class NotificarSinTurnoHandler {
 
            logger.info("Resultado de la notificación:  mail={}, razonRechazo={}", mail, razonRechazo);
            
-    } catch (Exception e) {
-         
-                logger.warn("Error debido a que el mail usado es invalido");
-                client.newThrowErrorCommand(job)
-                        .errorCode("mail_invalido_1")
-                        .errorMessage("El mail usado es invalido")
-                        .send()
-                        .exceptionally(t -> {
-                            throw new RuntimeException("No se pudo lanzar el error BPMN: " + t.getMessage(), t);
-                        });
     }
 }
-}
+
 
 

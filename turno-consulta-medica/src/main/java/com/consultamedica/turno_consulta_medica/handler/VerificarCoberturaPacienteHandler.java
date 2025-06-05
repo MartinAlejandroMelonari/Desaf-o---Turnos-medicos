@@ -22,13 +22,6 @@ public class VerificarCoberturaPacienteHandler {
                                                 final ActivatedJob job,
                                                 @Variable String num_socio,
                                                 @Variable Boolean apto) throws InterruptedException {
-       
-            //Error tecnico simulado
-            //String datosPaciente = pacienteRepository.findByNumSocio(num_socio);
-            //if (datosPaciente == null) {
-              //  throw new RuntimeException("El paciente no fue encontrado");
-            //}
-
 
            logger.info("Verificando cobertura para num_socio={}", num_socio);
 

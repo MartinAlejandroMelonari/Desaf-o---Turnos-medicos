@@ -73,7 +73,7 @@
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="task_notifica_sin_turno" name="Notificar sin turno">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="notificarSinTurno" retries="3" />
+        <zeebe:taskDefinition type="notificarSinTurno" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0a8udia</bpmn:incoming>
       <bpmn:outgoing>Flow_0tgirpl</bpmn:outgoing>
@@ -86,7 +86,7 @@
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="task_notificar_rechazo" name="Notificar Rechazo">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="notificarRechazo" retries="3" />
+        <zeebe:taskDefinition type="notificarRechazo" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1x7iyb2</bpmn:incoming>
       <bpmn:outgoing>Flow_0hh2fxt</bpmn:outgoing>

@@ -29,19 +29,18 @@ public class ConfirmarTurnoHandler {
             // Simulación de reglas de negocio
            if (num_socio.equals("335782") && fecha_turno.equals("2025-06-04T10:00:00")){
                razonRechazo = "El turno solicitado se encuentra duplicado";
+               logger.info("Resultado de la confirmación del turno: num_socio={}, fecha_turno={}, razonRechazo={}", num_socio, fecha_turno, razonRechazo);
                throw new RuntimeException("El turno está duplicado");
            }
-           if (fecha_turno.equals("2025-07-04T10:00:00")){
-                razonRechazo = "El turno solicitado ya tiene fecha con otro paciente";
+           if (fecha_turno.equals("2025-05-04T10:00:00")){
+                razonRechazo = "El turno solicitado tiene una fecha anterior a la actual";
+                logger.info("Resultado de la confirmación del turno: num_socio={}, fecha_turno={}, razonRechazo={}", num_socio, fecha_turno, razonRechazo);
                 throw new RuntimeException("La fecha es inválida");
            }
 
            // Crear mapa de variables
            Map<String, Object> variables = new HashMap<>();
            variables.put("fecha_turno", fecha_turno);
-           if (razonRechazo != null) {
-               variables.put("razonRechazo", razonRechazo);
-           }
 
            client.newCompleteCommand(job.getKey())
                    .variables(variables)
@@ -54,20 +53,21 @@ public class ConfirmarTurnoHandler {
             //throw new RuntimeException("No se pudo acceder a la API");
 
         } catch (Exception e) {
+
             logger.warn("Posible error técnico detectado al confirmar el turno");
 
             Integer retriesObj = job.getRetries();
             int remainingRetries = (retriesObj != null) ? retriesObj : 0;
     
             if (remainingRetries > 1) {
-                logger.warn("Error técnico detectado, reintentando... (retries restantes: {})", remainingRetries - 1);
+                logger.warn("Error técnico detectado (retries: {})", remainingRetries - 1);
                 client.newFailCommand(job.getKey())
                         .retries(remainingRetries - 1)
                         .errorMessage("Error técnico: " + e.getMessage())
                         .send()
                         .join(); // importante: join para esperar la respuesta
                         
-            } else if (fecha_turno.equals("2025-07-04T10:00:00")) {
+            } else if (fecha_turno.equals("2025-05-04T10:00:00")) {
                 logger.warn("Retries agotados, lanzando error BPMN (fecha_invalida)");
                 client.newThrowErrorCommand(job)
                         .errorCode("fecha_invalida")

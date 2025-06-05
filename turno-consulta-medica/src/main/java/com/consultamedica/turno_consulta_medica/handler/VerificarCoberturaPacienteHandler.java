@@ -22,7 +22,14 @@ public class VerificarCoberturaPacienteHandler {
                                                 final ActivatedJob job,
                                                 @Variable String num_socio,
                                                 @Variable Boolean apto) throws InterruptedException {
-       try {
+       
+            //Error tecnico simulado
+            //String datosPaciente = pacienteRepository.findByNumSocio(num_socio);
+            //if (datosPaciente == null) {
+              //  throw new RuntimeException("El paciente no fue encontrado");
+            //}
+
+
            logger.info("Verificando cobertura para num_socio={}", num_socio);
 
            String razonRechazo = null;
@@ -46,16 +53,7 @@ public class VerificarCoberturaPacienteHandler {
 
            logger.info("Resultado de cobertura: apto={}, razonRechazo={}", apto, razonRechazo);
 
-       } catch (Exception e) {
-           logger.error("Error técnico al verificar cobertura del paciente", e);
-           client.newFailCommand(job.getKey())
-                   .retries(job.getRetries() - 1)
-                   .errorMessage("Error técnico: " + e.getMessage())
-                   .send()
-                   .join();
-
-           throw new InterruptedException("Error técnico: " + e.getMessage());
        }
-   }
 }
+
 

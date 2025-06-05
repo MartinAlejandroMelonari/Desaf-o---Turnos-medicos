@@ -21,7 +21,7 @@ public class ConfirmarTurnoHandler {
                                         final ActivatedJob job,
                                         @Variable String num_socio,
                                         @Variable String fecha_turno) {
-        try {
+         try {
             logger.info("Confirmando el turno para el paciente num_socio={} para el dia fecha_turno={}", num_socio, fecha_turno);
 
             String razonRechazo = null;
@@ -54,11 +54,11 @@ public class ConfirmarTurnoHandler {
             //throw new RuntimeException("No se pudo acceder a la API");
 
         } catch (Exception e) {
-            logger.warn("Error técnico detectado");
+            logger.warn("Posible error técnico detectado al confirmar el turno");
 
             Integer retriesObj = job.getRetries();
             int remainingRetries = (retriesObj != null) ? retriesObj : 0;
-
+    
             if (remainingRetries > 1) {
                 logger.warn("Error técnico detectado, reintentando... (retries restantes: {})", remainingRetries - 1);
                 client.newFailCommand(job.getKey())
@@ -66,7 +66,7 @@ public class ConfirmarTurnoHandler {
                         .errorMessage("Error técnico: " + e.getMessage())
                         .send()
                         .join(); // importante: join para esperar la respuesta
-
+                        
             } else if (fecha_turno.equals("2025-07-04T10:00:00")) {
                 logger.warn("Retries agotados, lanzando error BPMN (fecha_invalida)");
                 client.newThrowErrorCommand(job)

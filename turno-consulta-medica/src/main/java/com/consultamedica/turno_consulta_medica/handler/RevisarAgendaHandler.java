@@ -23,8 +23,8 @@ public class RevisarAgendaHandler {
                                                 @Variable String motivo,
                                                 @Variable String fecha_turno,
                                                 @Variable Boolean turnoDisponible) throws InterruptedException {
-       try {
-           logger.info("Consultando turno para el día fecha_turno={} con la agenda (motivo={}, especialidad={})", fecha_turno);
+
+           logger.info("Consultando turno para el día fecha_turno={} con la agenda, con motivo={} y especialidad={}", fecha_turno, motivo, especialidad);
 
            String razonRechazo = null;
 
@@ -47,15 +47,6 @@ public class RevisarAgendaHandler {
 
            logger.info("Resultado de la consulta del turno: turnoDisponible={}, razonRechazo={}", turnoDisponible, razonRechazo);
 
-       } catch (Exception e) {
-           logger.error("Error técnico al revisar la agenda", e);
-           client.newFailCommand(job.getKey())
-                   .retries(job.getRetries() - 1)
-                   .errorMessage("Error técnico: " + e.getMessage())
-                   .send()
-                   .join();
-
-           throw new InterruptedException("Error técnico: " + e.getMessage());
        } 
-   }
 }
+

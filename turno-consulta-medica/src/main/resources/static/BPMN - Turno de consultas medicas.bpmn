@@ -28,14 +28,14 @@
     <bpmn:sequenceFlow id="Flow_06icbnx" sourceRef="Gateway_0b345dp" targetRef="Event_07q6elx">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=apto = false</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0jwkj2i" sourceRef="Gateway_0b345dp" targetRef="task_consultar_turnos">
+    <bpmn:sequenceFlow id="Flow_0jwkj2i" sourceRef="Gateway_0b345dp" targetRef="Event_0r3ww6m">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=apto = true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="task_consultar_turnos" name="Consultar turnos">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="revisarAgenda" />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0jwkj2i</bpmn:incoming>
+      <bpmn:incoming>Flow_1m2334s</bpmn:incoming>
       <bpmn:outgoing>Flow_0ppb7z0</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="Event_17dmb1i" name="No hay turno">
@@ -52,15 +52,15 @@
     <bpmn:sequenceFlow id="Flow_0ppb7z0" sourceRef="task_consultar_turnos" targetRef="Gateway_114mpiz" />
     <bpmn:serviceTask id="task_registrar_turno" name="Registrar turno">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="confirmarTurno" />
+        <zeebe:taskDefinition type="confirmarTurno" retries="3" />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1f4lxy0</bpmn:incoming>
+      <bpmn:incoming>Flow_0puk22h</bpmn:incoming>
       <bpmn:outgoing>Flow_0i86hkq</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_1f4lxy0" sourceRef="Gateway_114mpiz" targetRef="task_registrar_turno">
+    <bpmn:sequenceFlow id="Flow_1f4lxy0" sourceRef="Gateway_114mpiz" targetRef="Event_0rnmas5">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=turnoDisponible = true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:endEvent id="Event_1g3mipo" name="Turno no registrado">
+    <bpmn:endEvent id="Event_1g3mipo" name="Turno no registrado y notificado">
       <bpmn:incoming>Flow_00ndvow</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:endEvent id="Event_10kegi9" name="Turno registrado">
@@ -73,7 +73,7 @@
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="task_notifica_sin_turno" name="Notificar sin turno">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="notificarSinTurno" />
+        <zeebe:taskDefinition type="notificarSinTurno" retries="3" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0a8udia</bpmn:incoming>
       <bpmn:outgoing>Flow_0tgirpl</bpmn:outgoing>
@@ -86,7 +86,7 @@
     </bpmn:boundaryEvent>
     <bpmn:serviceTask id="task_notificar_rechazo" name="Notificar Rechazo">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="notificarRechazo" />
+        <zeebe:taskDefinition type="notificarRechazo" retries="3" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1x7iyb2</bpmn:incoming>
       <bpmn:outgoing>Flow_0hh2fxt</bpmn:outgoing>
@@ -100,15 +100,46 @@
     <bpmn:sequenceFlow id="Flow_0tgirpl" sourceRef="task_notifica_sin_turno" targetRef="Gateway_0l263o7" />
     <bpmn:sequenceFlow id="Flow_0hh2fxt" sourceRef="task_notificar_rechazo" targetRef="Gateway_0l263o7" />
     <bpmn:sequenceFlow id="Flow_00ndvow" sourceRef="Gateway_0l263o7" targetRef="Event_1g3mipo" />
+    <bpmn:boundaryEvent id="Event_00ft097" name="Mail invalido 1" attachedToRef="task_notifica_sin_turno">
+      <bpmn:outgoing>Flow_1xhjzdz</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0pf6763" errorRef="Error_1m8wzdf" />
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="Event_13i4jgi" name="Mail invalido 2" attachedToRef="task_notificar_rechazo">
+      <bpmn:outgoing>Flow_1by10rh</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0heiodf" errorRef="Error_1i13ccl" />
+    </bpmn:boundaryEvent>
+    <bpmn:endEvent id="Event_13thqsd" name="Turno no registrado y no notificado">
+      <bpmn:incoming>Flow_0eee6wa</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Gateway_1yc6kbw">
+      <bpmn:incoming>Flow_1xhjzdz</bpmn:incoming>
+      <bpmn:incoming>Flow_1by10rh</bpmn:incoming>
+      <bpmn:outgoing>Flow_0eee6wa</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1xhjzdz" sourceRef="Event_00ft097" targetRef="Gateway_1yc6kbw" />
+    <bpmn:sequenceFlow id="Flow_0eee6wa" sourceRef="Gateway_1yc6kbw" targetRef="Event_13thqsd" />
+    <bpmn:intermediateThrowEvent id="Event_0r3ww6m" name="Cobertura validada">
+      <bpmn:incoming>Flow_0jwkj2i</bpmn:incoming>
+      <bpmn:outgoing>Flow_1m2334s</bpmn:outgoing>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:sequenceFlow id="Flow_1m2334s" sourceRef="Event_0r3ww6m" targetRef="task_consultar_turnos" />
+    <bpmn:intermediateThrowEvent id="Event_0rnmas5" name="Turno asignado a la agenda">
+      <bpmn:incoming>Flow_1f4lxy0</bpmn:incoming>
+      <bpmn:outgoing>Flow_0puk22h</bpmn:outgoing>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:sequenceFlow id="Flow_0puk22h" sourceRef="Event_0rnmas5" targetRef="task_registrar_turno" />
+    <bpmn:sequenceFlow id="Flow_1by10rh" sourceRef="Event_13i4jgi" targetRef="Gateway_1yc6kbw" />
   </bpmn:process>
   <bpmn:error id="Error_19eaog2" name="Fecha inválida" errorCode="fecha_invalida" />
   <bpmn:error id="Error_116ry98" name="Turno duplicado" errorCode="turno_duplicado" />
+  <bpmn:error id="Error_1m8wzdf" name="Error_0p0rl01" errorCode="mail_invalido_1" />
+  <bpmn:error id="Error_1i13ccl" name="Error_2s8lgrh" errorCode="mail_invalido_2" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="registro_turnos">
       <bpmndi:BPMNShape id="Gateway_0b345dp_di" bpmnElement="Gateway_0b345dp" isMarkerVisible="true">
         <dc:Bounds x="455" y="155" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="441" y="118" width="78" height="27" />
+          <dc:Bounds x="431" y="118" width="78" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
@@ -127,10 +158,6 @@
         <dc:Bounds x="290" y="140" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0b7fuk7_di" bpmnElement="task_consultar_turnos">
-        <dc:Bounds x="620" y="140" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_17dmb1i_di" bpmnElement="Event_17dmb1i">
         <dc:Bounds x="892" y="272" width="36" height="36" />
         <bpmndi:BPMNLabel>
@@ -140,7 +167,7 @@
       <bpmndi:BPMNShape id="Gateway_114mpiz_di" bpmnElement="Gateway_114mpiz" isMarkerVisible="true">
         <dc:Bounds x="795" y="155" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="789" y="118" width="62" height="27" />
+          <dc:Bounds x="789" y="117.5" width="62" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0kcg1ap_di" bpmnElement="task_registrar_turno">
@@ -158,28 +185,65 @@
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1rexkyo_di" bpmnElement="task_notificar_rechazo">
-        <dc:Bounds x="1180" y="420" width="100" height="80" />
+        <dc:Bounds x="1180" y="500" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0l263o7_di" bpmnElement="Gateway_0l263o7" isMarkerVisible="true">
+        <dc:Bounds x="1505" y="405" width="50" height="50" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1g3mipo_di" bpmnElement="Event_1g3mipo">
-        <dc:Bounds x="1492" y="372" width="36" height="36" />
+        <dc:Bounds x="1642" y="412" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1489" y="415" width="49" height="27" />
+          <dc:Bounds x="1635" y="455" width="58" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0l263o7_di" bpmnElement="Gateway_0l263o7" isMarkerVisible="true">
-        <dc:Bounds x="1355" y="365" width="50" height="50" />
+      <bpmndi:BPMNShape id="Activity_0b7fuk7_di" bpmnElement="task_consultar_turnos">
+        <dc:Bounds x="650" y="140" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0r3ww6m_di" bpmnElement="Event_0r3ww6m">
+        <dc:Bounds x="552" y="162" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="546" y="205" width="49" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0rnmas5_di" bpmnElement="Event_0rnmas5">
+        <dc:Bounds x="912" y="162" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="889" y="205" width="85" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1yc6kbw_di" bpmnElement="Gateway_1yc6kbw" isMarkerVisible="true">
+        <dc:Bounds x="1315" y="415" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_13thqsd_di" bpmnElement="Event_13thqsd">
+        <dc:Bounds x="1412" y="422" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1397" y="465" width="73" height="40" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1jhxui6_di" bpmnElement="Event_1jhxui6">
         <dc:Bounds x="1022" y="202" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="931" y="223" width="78" height="14" />
+          <dc:Bounds x="951" y="243" width="78" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_076rfif_di" bpmnElement="Event_076rfif">
         <dc:Bounds x="1082" y="202" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1125" y="223" width="71" height="14" />
+          <dc:Bounds x="1104" y="243" width="71" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_00ft097_di" bpmnElement="Event_00ft097">
+        <dc:Bounds x="1232" y="342" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1265" y="373" width="70" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_13i4jgi_di" bpmnElement="Event_13i4jgi">
+        <dc:Bounds x="1232" y="482" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1265" y="473" width="70" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0cyrdqi_di" bpmnElement="Flow_0cyrdqi">
@@ -193,7 +257,7 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0jwkj2i_di" bpmnElement="Flow_0jwkj2i">
         <di:waypoint x="505" y="180" />
-        <di:waypoint x="620" y="180" />
+        <di:waypoint x="552" y="180" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1f9uyzf_di" bpmnElement="Flow_1f9uyzf">
         <di:waypoint x="820" y="205" />
@@ -201,12 +265,12 @@
         <di:waypoint x="892" y="290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0ppb7z0_di" bpmnElement="Flow_0ppb7z0">
-        <di:waypoint x="720" y="180" />
+        <di:waypoint x="750" y="180" />
         <di:waypoint x="795" y="180" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1f4lxy0_di" bpmnElement="Flow_1f4lxy0">
         <di:waypoint x="845" y="180" />
-        <di:waypoint x="1020" y="180" />
+        <di:waypoint x="912" y="180" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0i86hkq_di" bpmnElement="Flow_0i86hkq">
         <di:waypoint x="1120" y="180" />
@@ -223,22 +287,44 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1x7iyb2_di" bpmnElement="Flow_1x7iyb2">
         <di:waypoint x="1040" y="238" />
-        <di:waypoint x="1040" y="460" />
-        <di:waypoint x="1180" y="460" />
+        <di:waypoint x="1040" y="540" />
+        <di:waypoint x="1180" y="540" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0tgirpl_di" bpmnElement="Flow_0tgirpl">
         <di:waypoint x="1280" y="320" />
-        <di:waypoint x="1380" y="320" />
-        <di:waypoint x="1380" y="365" />
+        <di:waypoint x="1530" y="320" />
+        <di:waypoint x="1530" y="405" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0hh2fxt_di" bpmnElement="Flow_0hh2fxt">
-        <di:waypoint x="1280" y="460" />
-        <di:waypoint x="1380" y="460" />
-        <di:waypoint x="1380" y="415" />
+        <di:waypoint x="1280" y="540" />
+        <di:waypoint x="1530" y="540" />
+        <di:waypoint x="1530" y="455" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_00ndvow_di" bpmnElement="Flow_00ndvow">
-        <di:waypoint x="1405" y="390" />
-        <di:waypoint x="1492" y="390" />
+        <di:waypoint x="1555" y="430" />
+        <di:waypoint x="1642" y="430" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1xhjzdz_di" bpmnElement="Flow_1xhjzdz">
+        <di:waypoint x="1250" y="378" />
+        <di:waypoint x="1250" y="420" />
+        <di:waypoint x="1335" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0eee6wa_di" bpmnElement="Flow_0eee6wa">
+        <di:waypoint x="1365" y="440" />
+        <di:waypoint x="1412" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1m2334s_di" bpmnElement="Flow_1m2334s">
+        <di:waypoint x="588" y="180" />
+        <di:waypoint x="650" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0puk22h_di" bpmnElement="Flow_0puk22h">
+        <di:waypoint x="948" y="180" />
+        <di:waypoint x="1020" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1by10rh_di" bpmnElement="Flow_1by10rh">
+        <di:waypoint x="1250" y="482" />
+        <di:waypoint x="1250" y="440" />
+        <di:waypoint x="1315" y="440" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -27,7 +27,7 @@ Content-Type: application/json
 "mail": "correodeprueba@gmail.com"
 }
 
-### Ejemplo de turno de disponible
+### Ejemplo de turno no disponible
 POST http://localhost:8099/api/proceso/start
 Content-Type: application/json
 

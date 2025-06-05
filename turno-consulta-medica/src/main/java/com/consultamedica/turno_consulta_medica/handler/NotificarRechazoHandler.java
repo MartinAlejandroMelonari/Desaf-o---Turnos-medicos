@@ -21,6 +21,7 @@ public class NotificarRechazoHandler {
                                                 final ActivatedJob job,
                                                 @Variable String mail,
                                                 @Variable String num_socio) throws InterruptedException {
+            try {
            logger.info("Notifiando al num_socio={} que su turno fue rechazado, a traves de mail={}", num_socio, mail);
 
            String razonRechazo = null;
@@ -28,6 +29,8 @@ public class NotificarRechazoHandler {
            // Simulación de reglas de negocio
            if (mail != null && !mail.trim().toLowerCase().endsWith("@gmail.com")){
                razonRechazo = "El mail ingresado no es valido, asi que no se puede enviar la notificación";
+               logger.info("Resultado de la notificación:  mail={}, razonRechazo={}", mail, razonRechazo);
+               throw new RuntimeException("El mail ingresado no es valido");
            }
 
            // Crear mapa de variables
@@ -43,5 +46,18 @@ public class NotificarRechazoHandler {
                    .join();
 
            logger.info("Resultado de la notificación:  mail={}, razonRechazo={}", mail, razonRechazo);
+
+    } catch (Exception e) {
+       
+                logger.warn("Error debido a que el mail usado es invalido");
+                client.newThrowErrorCommand(job)
+                        .errorCode("mail_invalido_2")
+                        .errorMessage("El mail usado es invalido")
+                        .send()
+                        .exceptionally(t -> {
+                            throw new RuntimeException("No se pudo lanzar el error BPMN: " + t.getMessage(), t);
+                        });
     }
 }
+}
+
